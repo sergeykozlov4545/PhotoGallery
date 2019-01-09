@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ServiceApiManager {
-    private const val BASE_URL = "https://api.flickr.com/services/rest"
+    private const val BASE_URL = "https://api.flickr.com/services/"
 
     fun createService(): ServiceApi {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
