@@ -7,9 +7,13 @@ import android.support.v4.app.ActivityCompat.requestPermissions
 import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.widget.Toast
 
-fun Context?.isPermissionIsDenied(permission: String) = runCatching {
+fun Context?.isPermissionDenied(permission: String) = runCatching {
     this != null && checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED
 }.getOrDefault(true)
+
+fun Context?.isPermissionGranted(permission: String) = runCatching {
+    this != null && checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+}.getOrDefault(false)
 
 fun Activity.requestPermissions(permissions: List<String>, requestCode: Int) =
         requestPermissions(this, permissions.toTypedArray(), requestCode)

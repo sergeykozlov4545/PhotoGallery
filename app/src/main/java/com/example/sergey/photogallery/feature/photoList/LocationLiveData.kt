@@ -1,23 +1,24 @@
-package com.example.sergey.photogallery.data.repository
+package com.example.sergey.photogallery.feature.photoList
 
+import android.Manifest
 import android.annotation.SuppressLint
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
-import com.example.sergey.photogallery.exception.NotFoundGpsProvider
+import com.example.sergey.photogallery.exception.NotFoundGpsProviderException
 import com.example.sergey.photogallery.exception.NotFoundLocationManagerException
-
-interface LocationRepository {
-    fun getLastLocation(): LiveData<Location>
-}
+import com.example.sergey.photogallery.extansion.isPermissionGranted
 
 class LocationLiveData(
-        private val locationManager: LocationManager
+        context: Context
 ) : MutableLiveData<Location>() {
+
+    private val locationManager: LocationManager =
+            context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+                    ?: throw NotFoundLocationManagerException()
 
     private val locationListener = object : LocationListener {
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
@@ -27,8 +28,15 @@ class LocationLiveData(
         override fun onProviderDisabled(provider: String?) {}
 
         override fun onLocationChanged(location: Location?) {
-            value = location
+            postLocation(location)
         }
+    }
+
+    init {
+        if (!locationManager.allProviders.contains(LocationManager.GPS_PROVIDER)) {
+            throw NotFoundGpsProviderException()
+        }
+        getLastKnownLocation(context)
     }
 
     @SuppressLint("MissingPermission")
@@ -42,22 +50,15 @@ class LocationLiveData(
         super.onInactive()
         locationManager.removeUpdates(locationListener)
     }
-}
 
-class LocationRepositoryImpl(
-        context: Context
-) : LocationRepository {
-    private var locationLiveData: LocationLiveData
-
-    init {
-        val locationManager: LocationManager =
-                context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
-                        ?: throw NotFoundLocationManagerException()
-        if (!locationManager.allProviders.contains(LocationManager.GPS_PROVIDER)) {
-            throw NotFoundGpsProvider()
+    @SuppressLint("MissingPermission")
+    private fun getLastKnownLocation(context: Context) {
+        if (context.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            postLocation(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER))
         }
-        locationLiveData = LocationLiveData(locationManager)
     }
 
-    override fun getLastLocation() = locationLiveData
+    private fun postLocation(location: Location?) {
+        location.takeIf { it != null }?.let { postValue(it) }
+    }
 }

@@ -3,12 +3,13 @@ package com.example.sergey.photogallery.di
 import android.app.Application
 import com.example.sergey.photogallery.BuildConfig
 import com.example.sergey.photogallery.data.remote.ServiceApiManager
-import com.example.sergey.photogallery.data.repository.LocationRepository
-import com.example.sergey.photogallery.data.repository.LocationRepositoryImpl
-import com.example.sergey.photogallery.data.repository.PhotosRepository
-import com.example.sergey.photogallery.data.repository.PhotosRepositoryImpl
+import com.example.sergey.photogallery.feature.core.LifecycleScope
+import com.example.sergey.photogallery.feature.photoList.LocationViewModel
+import com.example.sergey.photogallery.feature.photoList.PhotoListViewModel
 import org.koin.android.ext.android.startKoin
+import org.koin.android.ext.koin.androidContext
 import org.koin.android.logger.AndroidLogger
+import org.koin.android.viewmodel.ext.koin.viewModel
 import org.koin.dsl.context.ModuleDefinition
 import org.koin.dsl.module.module
 import org.koin.log.EmptyLogger
@@ -19,7 +20,7 @@ object Injection : KoinComponent {
     private val rootModule = module {
         single { ServiceApiManager.createService() }
 
-        initRepositories()
+        initFeatures()
     }
 
     fun start(application: Application) {
@@ -28,7 +29,11 @@ object Injection : KoinComponent {
     }
 }
 
-fun ModuleDefinition.initRepositories() {
-    single<LocationRepository> { LocationRepositoryImpl(get()) }
-    single<PhotosRepository> { PhotosRepositoryImpl(get()) }
+fun ModuleDefinition.initFeatures() {
+    initPhotoListFeature()
+}
+
+fun ModuleDefinition.initPhotoListFeature() = module(path = "$path.photoList") {
+    viewModel { (scope: LifecycleScope) -> LocationViewModel(scope, androidContext()) }
+    viewModel { (scope: LifecycleScope) -> PhotoListViewModel(scope, get()) }
 }

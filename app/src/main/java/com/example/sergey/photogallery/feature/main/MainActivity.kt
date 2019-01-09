@@ -1,37 +1,27 @@
-package com.example.sergey.photogallery
+package com.example.sergey.photogallery.feature.main
 
 import android.Manifest
 import android.arch.lifecycle.Observer
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import com.example.sergey.photogallery.data.repository.LocationRepository
-import com.example.sergey.photogallery.data.repository.PhotosRepository
-import com.example.sergey.photogallery.extansion.isPermissionIsDenied
+import com.example.sergey.photogallery.R
+import com.example.sergey.photogallery.extansion.isPermissionDenied
 import com.example.sergey.photogallery.extansion.requestPermissions
 import com.example.sergey.photogallery.extansion.toast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
-import kotlin.coroutines.CoroutineContext
+import com.example.sergey.photogallery.feature.core.BaseActivity
+import com.example.sergey.photogallery.feature.photoList.LocationViewModel
+import com.example.sergey.photogallery.feature.photoList.PhotoListViewModel
+import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
-class MainActivity : AppCompatActivity(), KoinComponent, CoroutineScope {
+class MainActivity : BaseActivity() {
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
-    private val locationRepository by inject<LocationRepository>()
-    private val photosRepository by inject<PhotosRepository>()
-
-    private val job = SupervisorJob()
-
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+    private val locationViewModel by viewModel<LocationViewModel> { parametersOf(scope) }
+    private val photoListViewModel by viewModel<PhotoListViewModel> { parametersOf(scope) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,11 +31,6 @@ class MainActivity : AppCompatActivity(), KoinComponent, CoroutineScope {
     override fun onResume() {
         super.onResume()
         checkLocationPermission()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
     }
 
     override fun onRequestPermissionsResult(
@@ -69,21 +54,17 @@ class MainActivity : AppCompatActivity(), KoinComponent, CoroutineScope {
     }
 
     private fun checkLocationPermission() {
-        if (isPermissionIsDenied(Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (isPermissionDenied(Manifest.permission.ACCESS_FINE_LOCATION)) {
             requestPermissions(listOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             return
         }
-        observeLocationLiveData()
-    }
 
-    private fun observeLocationLiveData() {
-        locationRepository.getLastLocation().observe(this, Observer { location: Location? ->
-            launch {
-                location.takeIf { it != null }
-                        ?.let {
-                            photosRepository.getNearPhotos(it.latitude, it.longitude)
-                        }
-            }
+        photoListViewModel.photos.observe(this, Observer {
+            // TODO: Тут отображаем данные
+            toast("Loaded")
+        })
+        locationViewModel.locationLiveData.observe(this, Observer {
+            photoListViewModel.loadPhotos(it, false)
         })
     }
 }
