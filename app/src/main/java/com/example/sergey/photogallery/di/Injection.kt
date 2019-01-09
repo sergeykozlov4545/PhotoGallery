@@ -5,6 +5,8 @@ import com.example.sergey.photogallery.BuildConfig
 import com.example.sergey.photogallery.data.remote.ServiceApiManager
 import com.example.sergey.photogallery.data.repository.LocationRepository
 import com.example.sergey.photogallery.data.repository.LocationRepositoryImpl
+import com.example.sergey.photogallery.data.repository.PhotosRepository
+import com.example.sergey.photogallery.data.repository.PhotosRepositoryImpl
 import org.koin.android.ext.android.startKoin
 import org.koin.android.logger.AndroidLogger
 import org.koin.dsl.context.ModuleDefinition
@@ -28,4 +30,5 @@ object Injection : KoinComponent {
 
 fun ModuleDefinition.initRepositories() {
     single<LocationRepository> { LocationRepositoryImpl(get()) }
+    single<PhotosRepository> { PhotosRepositoryImpl(get()) }
 }

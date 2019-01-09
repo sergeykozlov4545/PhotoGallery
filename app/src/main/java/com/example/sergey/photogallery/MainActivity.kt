@@ -7,19 +7,31 @@ import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.example.sergey.photogallery.data.repository.LocationRepository
+import com.example.sergey.photogallery.data.repository.PhotosRepository
 import com.example.sergey.photogallery.extansion.isPermissionIsDenied
 import com.example.sergey.photogallery.extansion.requestPermissions
 import com.example.sergey.photogallery.extansion.toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
+import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity(), KoinComponent {
+class MainActivity : AppCompatActivity(), KoinComponent, CoroutineScope {
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
     private val locationRepository by inject<LocationRepository>()
+    private val photosRepository by inject<PhotosRepository>()
+
+    private val job = SupervisorJob()
+
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +41,11 @@ class MainActivity : AppCompatActivity(), KoinComponent {
     override fun onResume() {
         super.onResume()
         checkLocationPermission()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 
     override fun onRequestPermissionsResult(
@@ -60,9 +77,13 @@ class MainActivity : AppCompatActivity(), KoinComponent {
     }
 
     private fun observeLocationLiveData() {
-        // TODO: тут можно подписываться на координаты
         locationRepository.getLastLocation().observe(this, Observer { location: Location? ->
-            toast("location = $location")
+            launch {
+                location.takeIf { it != null }
+                        ?.let {
+                            photosRepository.getNearPhotos(it.latitude, it.longitude)
+                        }
+            }
         })
     }
 }

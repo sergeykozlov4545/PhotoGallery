@@ -1,6 +1,6 @@
 package com.example.sergey.photogallery.data.remote.params
 
-data class PhotoSearchParams(
+data class PhotosSearchParams(
         val latitude: Double,
         val longitude: Double
 ) : BaseParams() {

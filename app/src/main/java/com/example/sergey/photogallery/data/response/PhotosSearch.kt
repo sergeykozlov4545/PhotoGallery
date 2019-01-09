@@ -3,7 +3,7 @@ package com.example.sergey.photogallery.data.response
 import com.example.sergey.photogallery.data.pojo.Photo
 import com.google.gson.annotations.SerializedName
 
-data class PhotoSearch(
+data class PhotosSearch(
         @SerializedName("stat") val status: Status,
         @SerializedName("code") val errorCode: Int? = 0,
         @SerializedName("message") val errorMessage: String? = "",
