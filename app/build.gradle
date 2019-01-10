@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -57,5 +59,10 @@ dependencies {
 
     // lifecycle
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
-    annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"
+    kapt "android.arch.lifecycle:compiler:$lifecycle_version"
+
+    implementation "com.makeramen:roundedimageview:2.3.0"
+
+    implementation "com.github.bumptech.glide:glide:$glide_version"
+    kapt "com.github.bumptech.glide:compiler:$glide_version"
 }
