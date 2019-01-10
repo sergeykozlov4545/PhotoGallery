@@ -5,11 +5,4 @@ import android.support.v7.app.AppCompatActivity
 import org.koin.standalone.KoinComponent
 
 @SuppressLint("Registered")
-open class BaseActivity : AppCompatActivity(), KoinComponent {
-    val scope = LifecycleScope()
-
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
-    }
-}
+open class BaseActivity : AppCompatActivity(), KoinComponent

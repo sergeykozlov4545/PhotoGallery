@@ -15,6 +15,10 @@ fun Context?.isPermissionGranted(permission: String) = runCatching {
     this != null && checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 }.getOrDefault(false)
 
+
+fun Activity.requestPermission(permission: String, requestCode: Int) =
+        requestPermissions(listOf(permission), requestCode)
+
 fun Activity.requestPermissions(permissions: List<String>, requestCode: Int) =
         requestPermissions(this, permissions.toTypedArray(), requestCode)
 

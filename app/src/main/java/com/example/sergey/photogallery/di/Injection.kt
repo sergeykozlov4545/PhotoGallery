@@ -3,7 +3,6 @@ package com.example.sergey.photogallery.di
 import android.app.Application
 import com.example.sergey.photogallery.BuildConfig
 import com.example.sergey.photogallery.data.remote.ServiceApiManager
-import com.example.sergey.photogallery.feature.core.LifecycleScope
 import com.example.sergey.photogallery.feature.photoList.LocationViewModel
 import com.example.sergey.photogallery.feature.photoList.PhotoListViewModel
 import org.koin.android.ext.android.startKoin
@@ -34,6 +33,6 @@ fun ModuleDefinition.initFeatures() {
 }
 
 fun ModuleDefinition.initPhotoListFeature() = module(path = "$path.photoList") {
-    viewModel { (scope: LifecycleScope) -> LocationViewModel(scope, androidContext()) }
-    viewModel { (scope: LifecycleScope) -> PhotoListViewModel(scope, get()) }
+    viewModel { LocationViewModel(androidContext()) }
+    viewModel { PhotoListViewModel(get()) }
 }

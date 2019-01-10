@@ -6,13 +6,10 @@ import com.example.sergey.photogallery.data.remote.ServiceApi
 import com.example.sergey.photogallery.data.remote.params.PhotosSearchParams
 import com.example.sergey.photogallery.data.response.PhotosSearch
 import com.example.sergey.photogallery.feature.core.BaseViewModel
-import com.example.sergey.photogallery.feature.core.LifecycleScope
-import kotlinx.coroutines.launch
 
 class PhotoListViewModel(
-        scope: LifecycleScope,
         private val serviceApi: ServiceApi
-) : BaseViewModel(scope) {
+) : BaseViewModel() {
 
     var photos = MutableLiveData<PhotosSearch>()
 
@@ -31,7 +28,7 @@ class PhotoListViewModel(
     }
 
     private fun loadPhotosAsync(location: Location) {
-        launch {
+        runInScope {
             val data = serviceApi.getNearPhotos(PhotosSearchParams(location.latitude, location.longitude)).await()
             photos.postValue(data)
         }
