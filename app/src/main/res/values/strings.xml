@@ -2,4 +2,6 @@
     <string name="app_name">PhotoGallery</string>
 
     <string name="location_permission_denied">Нужно включить разрешение!</string>
+    <string name="error_load">Произошла ошибка загрузки</string>
+    <string name="retry_load">Повторить загрузку</string>
 </resources>

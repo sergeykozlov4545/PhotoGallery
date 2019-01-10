@@ -7,5 +7,6 @@ data class PhotosSearchParams(
     init {
         this["lat"] = latitude.toString()
         this["lon"] = longitude.toString()
+        this["extras"] = "url_q"
     }
 }
