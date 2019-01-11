@@ -53,6 +53,10 @@ class PhotoListViewModel(
         }
     }
 
+    override fun errorRunInScope() {
+        photosLoadingState.postValue(ErrorLoadingState())
+    }
+
     private fun isValidLocation(latitude: Float, longitude: Float): Boolean {
         return (latitude * 1e6).toInt() > 0 && (longitude * 1e6).toInt() > 0
     }

@@ -14,8 +14,17 @@ open class BaseViewModel : ViewModel() {
     }
 
     protected fun runInScope(block: suspend CoroutineScope.() -> Unit) {
-        scope.launch(block = block)
+        scope.launch {
+            val result = runCatching {
+                block()
+            }
+            if (result.isFailure) {
+                errorRunInScope()
+            }
+        }
     }
+
+    protected open fun errorRunInScope() {}
 
     fun stopScope() {
         scope.cancel()
