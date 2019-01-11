@@ -50,10 +50,13 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun checkLocationPermission() =
-            !isPermissionDenied(Manifest.permission.ACCESS_FINE_LOCATION).apply {
-                requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE)
-            }
+    private fun checkLocationPermission(): Boolean {
+        val isPermissionDenied = isPermissionDenied(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (isPermissionDenied) {
+            requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE)
+        }
+        return !isPermissionDenied
+    }
 
     private fun showDataFragment() {
         supportFragmentManager.showFragment(R.id.content, PhotoListFragment.TAG) {
