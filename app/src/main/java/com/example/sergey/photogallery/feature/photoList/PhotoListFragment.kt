@@ -45,6 +45,10 @@ class PhotoListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        retryView.setOnClickListener {
+            photoListViewModel?.loadPhotos(locationViewModel?.locationLiveData?.value, true)
+        }
+
         with(photoListView) {
             layoutManager = GridLayoutManager(activity?.applicationContext, getPhotoListColumnCount())
             adapter = photoListAdapter.apply {
