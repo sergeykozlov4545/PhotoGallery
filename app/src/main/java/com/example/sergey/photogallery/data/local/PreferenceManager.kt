@@ -5,6 +5,8 @@ import android.content.Context
 interface PreferenceManager {
     fun putInt(key: String, value: Int)
     fun getInt(key: String, defValue: Int): Int
+    fun putLong(key: String, value: Long)
+    fun getLong(key: String, defValue: Long): Long
     fun putString(key: String, value: String)
     fun getString(key: String, defValue: String): String
     fun putFloat(key: String, value: Float)
@@ -23,6 +25,12 @@ class PreferenceManagerImpl(
 
     override fun getInt(key: String, defValue: Int) =
             preferences.getInt(key, defValue)
+
+    override fun putLong(key: String, value: Long) =
+            preferences.edit().putLong(key, value).apply()
+
+    override fun getLong(key: String, defValue: Long) =
+            preferences.getLong(key, defValue)
 
     override fun putString(key: String, value: String) =
             preferences.edit().putString(key, value).apply()
