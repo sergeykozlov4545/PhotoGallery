@@ -5,6 +5,10 @@ import android.location.Location
 import android.location.LocationManager
 import com.example.sergey.photogallery.data.database.ApplicationDataBase
 import com.example.sergey.photogallery.data.local.PreferenceManager
+import com.example.sergey.photogallery.data.pojo.ErrorLoadingState
+import com.example.sergey.photogallery.data.pojo.LoadingCompleteState
+import com.example.sergey.photogallery.data.pojo.LoadingDataState
+import com.example.sergey.photogallery.data.pojo.LoadingStartState
 import com.example.sergey.photogallery.data.remote.ServiceApi
 import com.example.sergey.photogallery.data.remote.params.PhotosSearchParams
 import com.example.sergey.photogallery.data.response.PhotosInfo
@@ -28,7 +32,7 @@ class PhotoListViewModel(
         private const val DEFAULT_LAST_LOCATION_VALUE = 0f
     }
 
-    var photos = MutableLiveData<PhotosSearch>()
+    val photosLoadingState = MutableLiveData<LoadingDataState>()
 
     private var lastLocation: Location? = null
 
@@ -61,7 +65,12 @@ class PhotoListViewModel(
                     !isLoadedFromDb -> loadFromDb()
                     else -> return@withLock
                 }
-                photos.postValue(photosSearchDeferred.await())
+                val data = photosSearchDeferred.await()
+                val state = when (data.status) {
+                    Status.OK -> LoadingCompleteState(data.photosInfo)
+                    Status.ERROR -> ErrorLoadingState()
+                }
+                photosLoadingState.postValue(state)
             }
         }
     }
@@ -71,6 +80,8 @@ class PhotoListViewModel(
     }
 
     private fun loadFromRemote(location: Location) = GlobalScope.async {
+        photosLoadingState.postValue(LoadingStartState())
+
         applicationDataBase.getPhotoDao().clearPhotos()
         val data = serviceApi.getNearPhotos(PhotosSearchParams(location.latitude, location.longitude)).await()
         return@async data.apply {
@@ -90,6 +101,8 @@ class PhotoListViewModel(
     }
 
     private fun loadFromDb() = GlobalScope.async {
+        photosLoadingState.postValue(LoadingStartState())
+
         isLoadedFromDb = true
         val photosInDatabase = applicationDataBase.getPhotoDao().getPhotos()
         val photosInfo = PhotosInfo(perPage = photosInDatabase.size, photos = photosInDatabase)

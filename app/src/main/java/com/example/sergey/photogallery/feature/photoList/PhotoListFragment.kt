@@ -9,9 +9,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.sergey.photogallery.R
+import com.example.sergey.photogallery.data.pojo.ErrorLoadingState
+import com.example.sergey.photogallery.data.pojo.LoadingCompleteState
+import com.example.sergey.photogallery.data.pojo.LoadingStartState
 import com.example.sergey.photogallery.data.pojo.Photo
-import com.example.sergey.photogallery.data.response.PhotosSearch
-import com.example.sergey.photogallery.data.response.Status
+import com.example.sergey.photogallery.data.response.PhotosInfo
 import com.example.sergey.photogallery.extansion.hideView
 import com.example.sergey.photogallery.extansion.showView
 import com.example.sergey.photogallery.feature.core.BaseFragment
@@ -65,28 +67,35 @@ class PhotoListFragment : BaseFragment() {
         locationViewModel?.locationLiveData?.observe(activity, Observer<Location> {
             photoListViewModel?.loadPhotos(it, false)
         })
-        photoListViewModel?.photos?.observe(activity, Observer<PhotosSearch> { photosSearch ->
-            photosSearch.takeIf { it != null }?.let { updateView(it) }
+        photoListViewModel?.photosLoadingState?.observe(activity, Observer { state ->
+            state.takeIf { it != null }?.let {
+                when (it) {
+                    is LoadingStartState -> startedLoading()
+                    is ErrorLoadingState -> errorLoading(it.message)
+                    is LoadingCompleteState<*> ->
+                        if (it.data is PhotosInfo) loadingCompleted(it.data)
+                }
+            }
         })
     }
 
-    private fun updateView(photosSearch: PhotosSearch) {
-        when (photosSearch.status) {
-            Status.OK -> showPhotoList(photosSearch)
-            Status.ERROR -> showError()
-        }
-    }
-
-    private fun showError() {
-        progressBar.hideView()
-        errorGroup.showView()
+    private fun startedLoading() {
+        progressBar.showView()
+        errorGroup.hideView()
         photoListView.hideView()
     }
 
-    private fun showPhotoList(photosSearch: PhotosSearch) {
+    private fun errorLoading(message: String) {
         progressBar.hideView()
-        errorGroup.hideView()
-        photoListAdapter.data = photosSearch.photosInfo?.photos
+        if (message.isNotEmpty()) {
+            errorMessageView.text = message
+        }
+        errorGroup.showView()
+    }
+
+    private fun loadingCompleted(photosInfo: PhotosInfo) {
+        progressBar.hideView()
+        photoListAdapter.data = photosInfo.photos
         photoListView.showView()
     }
 }
