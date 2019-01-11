@@ -67,8 +67,8 @@ class PhotoListViewModel(
         mutex.withLock {
             location.takeIf { it != null }?.let {
                 val photosSearchDeferred = when {
-                    needLoadFromRemote(it, force) -> loadFromRemote(it)
-                    !isLoadedFromDb -> loadFromDb()
+                    needLoadFromRemote(it, force) -> loadFromRemoteAsync(it)
+                    !isLoadedFromDb -> loadFromDbAsync()
                     else -> return@withLock
                 }
                 val data = photosSearchDeferred.await()
@@ -85,7 +85,7 @@ class PhotoListViewModel(
         return force || lastLocation == null || lastLocation!!.distanceTo(location) > 5 * 1000
     }
 
-    private fun loadFromRemote(location: Location) = GlobalScope.async {
+    private fun loadFromRemoteAsync(location: Location) = GlobalScope.async {
         photosLoadingState.postValue(LoadingStartState())
 
         applicationDataBase.getPhotoDao().clearPhotos()
@@ -106,7 +106,7 @@ class PhotoListViewModel(
         preferenceManager.putFloat(LAST_LONGITUDE, location.longitude.toFloat())
     }
 
-    private fun loadFromDb() = GlobalScope.async {
+    private fun loadFromDbAsync() = GlobalScope.async {
         photosLoadingState.postValue(LoadingStartState())
 
         isLoadedFromDb = true
