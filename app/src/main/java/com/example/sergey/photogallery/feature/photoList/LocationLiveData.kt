@@ -1,6 +1,5 @@
 package com.example.sergey.photogallery.feature.photoList
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
@@ -10,11 +9,11 @@ import android.location.LocationManager
 import android.os.Bundle
 import com.example.sergey.photogallery.exception.NotFoundGpsProviderException
 import com.example.sergey.photogallery.exception.NotFoundLocationManagerException
-import com.example.sergey.photogallery.extansion.isPermissionGranted
+import org.koin.standalone.KoinComponent
 
 class LocationLiveData(
         context: Context
-) : MutableLiveData<Location>() {
+) : MutableLiveData<Location>(), KoinComponent {
 
     private val locationManager: LocationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
@@ -36,7 +35,6 @@ class LocationLiveData(
         if (!locationManager.allProviders.contains(LocationManager.GPS_PROVIDER)) {
             throw NotFoundGpsProviderException()
         }
-        getLastKnownLocation(context)
     }
 
     @SuppressLint("MissingPermission")
@@ -49,13 +47,6 @@ class LocationLiveData(
     override fun onInactive() {
         super.onInactive()
         locationManager.removeUpdates(locationListener)
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun getLastKnownLocation(context: Context) {
-        if (context.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            postLocation(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER))
-        }
     }
 
     private fun postLocation(location: Location?) {

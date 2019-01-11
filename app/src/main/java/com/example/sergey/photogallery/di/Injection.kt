@@ -37,5 +37,5 @@ fun ModuleDefinition.initFeatures() {
 
 fun ModuleDefinition.initPhotoListFeature() = module(path = "$path.photoList") {
     viewModel { LocationViewModel(androidContext()) }
-    viewModel { PhotoListViewModel(get()) }
+    viewModel { PhotoListViewModel(get(), get()) }
 }
