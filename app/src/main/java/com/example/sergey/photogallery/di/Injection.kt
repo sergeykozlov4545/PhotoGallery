@@ -2,6 +2,7 @@ package com.example.sergey.photogallery.di
 
 import android.app.Application
 import com.example.sergey.photogallery.BuildConfig
+import com.example.sergey.photogallery.data.database.ApplicationDataBaseFactory
 import com.example.sergey.photogallery.data.local.PreferenceManager
 import com.example.sergey.photogallery.data.local.PreferenceManagerImpl
 import com.example.sergey.photogallery.data.remote.ServiceApiManager
@@ -21,6 +22,7 @@ object Injection : KoinComponent {
     private val rootModule = module {
         single { ServiceApiManager.createService() }
         single<PreferenceManager> { PreferenceManagerImpl(androidContext()) }
+        single { ApplicationDataBaseFactory.build(androidContext()) }
 
         initFeatures()
     }
@@ -37,5 +39,5 @@ fun ModuleDefinition.initFeatures() {
 
 fun ModuleDefinition.initPhotoListFeature() = module(path = "$path.photoList") {
     viewModel { LocationViewModel(androidContext()) }
-    viewModel { PhotoListViewModel(get(), get()) }
+    viewModel { PhotoListViewModel(get(), get(), get()) }
 }

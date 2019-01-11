@@ -4,7 +4,7 @@ import com.example.sergey.photogallery.data.pojo.Photo
 import com.google.gson.annotations.SerializedName
 
 data class PhotosSearch(
-        @SerializedName("stat") val status: Status,
+        @SerializedName("stat") val status: Status = Status.OK,
         @SerializedName("code") val errorCode: Int? = 0,
         @SerializedName("message") val errorMessage: String? = "",
         @SerializedName("photos") val photosInfo: PhotosInfo? = null
