@@ -21,6 +21,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class PhotoListViewModel(
+        locationManager: LocationManager,
         private val serviceApi: ServiceApi,
         private val preferenceManager: PreferenceManager,
         private val applicationDataBase: ApplicationDataBase
@@ -32,6 +33,7 @@ class PhotoListViewModel(
         private const val DEFAULT_LAST_LOCATION_VALUE = 0f
     }
 
+    val locationLiveData = LocationLiveData(locationManager)
     val photosLoadingState = MutableLiveData<LoadingDataState>()
 
     private var lastLocation: Location? = null

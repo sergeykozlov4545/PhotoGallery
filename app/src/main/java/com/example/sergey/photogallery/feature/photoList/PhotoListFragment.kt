@@ -9,10 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.sergey.photogallery.R
-import com.example.sergey.photogallery.data.pojo.ErrorLoadingState
-import com.example.sergey.photogallery.data.pojo.LoadingCompleteState
-import com.example.sergey.photogallery.data.pojo.LoadingStartState
-import com.example.sergey.photogallery.data.pojo.Photo
+import com.example.sergey.photogallery.data.pojo.*
 import com.example.sergey.photogallery.data.response.PhotosInfo
 import com.example.sergey.photogallery.extansion.hideView
 import com.example.sergey.photogallery.extansion.showView
@@ -26,7 +23,6 @@ class PhotoListFragment : BaseFragment() {
         const val TAG = "photo_list_fragment"
     }
 
-    private val locationViewModel by lazy { activity?.getViewModel<LocationViewModel>() }
     private val photoListViewModel by lazy { activity?.getViewModel<PhotoListViewModel>() }
 
     private val photoListAdapter = SingleHolderAdapter<Photo>()
@@ -46,7 +42,11 @@ class PhotoListFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         retryView.setOnClickListener {
-            photoListViewModel?.loadPhotos(locationViewModel?.locationLiveData?.value, true)
+            photoListViewModel.takeIf { viewModel -> viewModel != null }?.let { viewModel ->
+                with(viewModel) {
+                    loadPhotos(locationLiveData.value, true)
+                }
+            }
         }
 
         with(photoListView) {
@@ -68,19 +68,23 @@ class PhotoListFragment : BaseFragment() {
     private fun getPhotoListColumnCount() = resources.getInteger(R.integer.photo_list_column_count)
 
     private fun observeViewModels(activity: FragmentActivity) {
-        locationViewModel?.locationLiveData?.observe(activity, Observer<Location> {
-            photoListViewModel?.loadPhotos(it, false)
-        })
-        photoListViewModel?.photosLoadingState?.observe(activity, Observer { state ->
-            state.takeIf { it != null }?.let {
-                when (it) {
-                    is LoadingStartState -> startedLoading()
-                    is ErrorLoadingState -> errorLoading(it.message)
-                    is LoadingCompleteState<*> ->
-                        if (it.data is PhotosInfo) loadingCompleted(it.data)
-                }
+        photoListViewModel.takeIf { it != null }?.let { viewModel ->
+            with(viewModel) {
+                photosLoadingState.observe(activity, Observer(this@PhotoListFragment::parseLoadingState))
+                locationLiveData.observe(activity, Observer<Location> { loadPhotos(it) })
             }
-        })
+        }
+    }
+
+    private fun parseLoadingState(loadingState: LoadingDataState?) {
+        loadingState.takeIf { it != null }?.let {
+            when (it) {
+                is LoadingStartState -> startedLoading()
+                is ErrorLoadingState -> errorLoading(it.message)
+                is LoadingCompleteState<*> ->
+                    if (it.data is PhotosInfo) loadingCompleted(it.data)
+            }
+        }
     }
 
     private fun startedLoading() {
