@@ -97,6 +97,8 @@ class PhotoListFragment : BaseFragment() {
         progressBar.hideView()
         if (message.isNotEmpty()) {
             errorMessageView.text = message
+        } else {
+            errorMessageView.text = getString(R.string.error_load)
         }
         errorGroup.showView()
     }
