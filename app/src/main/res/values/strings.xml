@@ -4,4 +4,8 @@
     <string name="location_permission_denied">Нужно включить разрешение!</string>
     <string name="error_load">Произошла ошибка загрузки</string>
     <string name="retry_load">Повторить загрузку</string>
+
+    <string name="filter_params">Параметры поиска</string>
+    <string name="radius_filter">Радиус (в км)</string>
+    <string name="per_page_filter">Максимальное количество фото</string>
 </resources>

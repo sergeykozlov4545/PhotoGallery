@@ -3,6 +3,8 @@ package com.example.sergey.photogallery.feature.main
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.RotateAnimation
 import com.example.sergey.photogallery.R
 import com.example.sergey.photogallery.extansion.isPermissionDenied
 import com.example.sergey.photogallery.extansion.requestPermission
@@ -10,6 +12,7 @@ import com.example.sergey.photogallery.extansion.showFragment
 import com.example.sergey.photogallery.extansion.toast
 import com.example.sergey.photogallery.feature.core.BaseActivity
 import com.example.sergey.photogallery.feature.photoList.PhotoListFragment
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity() {
 
@@ -17,9 +20,15 @@ class MainActivity : BaseActivity() {
         private const val LOCATION_REQUEST_CODE = 1
     }
 
+    private var currentIconDergee = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        filterHeaderContainer.setOnClickListener {
+            toggleFilterIcon()
+        }
     }
 
     override fun onResume() {
@@ -62,5 +71,20 @@ class MainActivity : BaseActivity() {
         supportFragmentManager.showFragment(R.id.content, PhotoListFragment.TAG) {
             return@showFragment PhotoListFragment()
         }
+    }
+
+    private fun toggleFilterIcon() {
+        val pivotX = filterIconView.width / 2f
+        val pivotY = filterIconView.height / 2f
+
+        val fromDegree = currentIconDergee.toFloat()
+        currentIconDergee = (currentIconDergee + 180) % 360
+        val toDegree = currentIconDergee.toFloat()
+        val animation = RotateAnimation(fromDegree, toDegree, pivotX, pivotY).apply {
+            duration = 250
+            interpolator = AccelerateInterpolator()
+            fillAfter = true
+        }
+        filterIconView.startAnimation(animation)
     }
 }
